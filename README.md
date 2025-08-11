@@ -17,7 +17,9 @@ A modern, feature-rich development journal application built with React. Track y
 
 ## 🚀 Live Demo
 
-[View Live Demo](https://your-app-url.vercel.app) _(Will be available after deployment)_
+**[🔗 View Live Demo](https://dev-journal-coral.vercel.app/)**
+
+Try the application with sample data included!
 
 ## 🛠️ Technologies Used
 
