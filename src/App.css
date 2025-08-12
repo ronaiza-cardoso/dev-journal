@@ -170,6 +170,58 @@ body {
   }
 }
 
+/* Copy Week Button Styles */
+.week-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.week-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.week-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.copy-week-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 1rem;
+}
+
+.copy-week-button:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.copy-week-button:active {
+  background: #f3f4f6;
+  transform: scale(0.95);
+}
+
+/* Ensure week header doesn't expand when clicking copy button */
+.copy-week-button:hover + .week-title,
+.copy-week-button:focus + .week-title {
+  background: none;
+}
+
 /* Notification Styles */
 .notification {
   position: fixed;

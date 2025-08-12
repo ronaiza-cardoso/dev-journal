@@ -11,6 +11,7 @@ import {
   Edit3,
   Filter,
   X,
+  Copy,
 } from "lucide-react";
 import MarkdownPreview from "@uiw/react-markdown-preview";
 import { parseLocalDate } from "../utils/dateUtils";
@@ -84,10 +85,89 @@ const WeekSection = ({
 }) => {
   const totalEntries = entries.length;
 
+  const copyWeekContent = async () => {
+    try {
+      // Sort entries by date (oldest first for chronological order)
+      const sortedEntries = [...entries].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+
+      // Format the week content as plain text
+      let weekText = `Week of ${weekStart}\n`;
+      weekText += "=".repeat(weekText.length - 1) + "\n\n";
+
+      sortedEntries.forEach((entry) => {
+        const date = parseLocalDate(entry.date);
+        const dayName = format(date, "EEEE"); // Full day name (Monday, Tuesday, etc.)
+        const dayDate = format(date, "MMM dd"); // Month day (Jan 15)
+
+        weekText += `${dayName}, ${dayDate}\n`;
+        weekText += "-".repeat(`${dayName}, ${dayDate}`.length) + "\n";
+
+        // Remove markdown formatting and get plain text
+        const plainText = entry.mainEntry
+          .replace(/#{1,6}\s+/g, "") // Remove headers
+          .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
+          .replace(/\*(.*?)\*/g, "$1") // Remove italic
+          .replace(/`(.*?)`/g, "$1") // Remove inline code
+          .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+          .replace(/\[(.*?)\]\(.*?\)/g, "$1") // Remove links, keep text
+          .replace(/^\s*[-*+]\s+/gm, "• ") // Convert list items to bullets
+          .replace(/^\s*\d+\.\s+/gm, "• ") // Convert numbered lists to bullets
+          .trim();
+
+        weekText += plainText + "\n\n";
+      });
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(weekText.trim());
+
+      // Show success feedback (you could add a toast notification here)
+      console.log("Week content copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy week content:", error);
+      // Fallback for older browsers - recreate the text since it's out of scope
+      try {
+        const sortedEntries = [...entries].sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        );
+        let fallbackText = `Week of ${weekStart}\n`;
+        fallbackText += "=".repeat(fallbackText.length - 1) + "\n\n";
+        sortedEntries.forEach((entry) => {
+          const date = parseLocalDate(entry.date);
+          const dayName = format(date, "EEEE");
+          const dayDate = format(date, "MMM dd");
+          fallbackText += `${dayName}, ${dayDate}\n`;
+          fallbackText += "-".repeat(`${dayName}, ${dayDate}`.length) + "\n";
+          const plainText = entry.mainEntry
+            .replace(/#{1,6}\s+/g, "")
+            .replace(/\*\*(.*?)\*\*/g, "$1")
+            .replace(/\*(.*?)\*/g, "$1")
+            .replace(/`(.*?)`/g, "$1")
+            .replace(/```[\s\S]*?```/g, "")
+            .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+            .replace(/^\s*[-*+]\s+/gm, "• ")
+            .replace(/^\s*\d+\.\s+/gm, "• ")
+            .trim();
+          fallbackText += plainText + "\n\n";
+        });
+
+        const textArea = document.createElement("textarea");
+        textArea.value = fallbackText.trim();
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      } catch (fallbackError) {
+        console.error("Fallback copy also failed:", fallbackError);
+      }
+    }
+  };
+
   return (
     <div className="week-section">
-      <div className="week-header" onClick={onToggle}>
-        <div className="week-title">
+      <div className="week-header">
+        <div className="week-title" onClick={onToggle}>
           <div className="week-toggle">
             {isExpanded ? (
               <ChevronDown size={16} />
@@ -107,6 +187,16 @@ const WeekSection = ({
             </span>
           </div>
         </div>
+        <button
+          className="copy-week-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            copyWeekContent();
+          }}
+          title="Copy week content to clipboard"
+        >
+          <Copy size={14} />
+        </button>
       </div>
 
       {isExpanded && (
