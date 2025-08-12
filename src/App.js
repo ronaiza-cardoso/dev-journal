@@ -6,6 +6,8 @@ import EntryForm from "./components/EntryForm";
 import EntryList from "./components/EntryList";
 import Notification from "./components/Notification";
 import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
+import ContributionsCalendar from "./components/ContributionsCalendar";
+import ConsistencyView from "./components/ConsistencyView";
 
 import indexedDBService from "./services/indexedDBService";
 import { getCurrentDateString } from "./utils/dateUtils";
@@ -368,6 +370,10 @@ function App() {
             isEditing={!!editingEntry}
             onCancel={cancelEdit}
           />
+        ) : view === "calendar" ? (
+          <ContributionsCalendar entries={entries} />
+        ) : view === "consistency" ? (
+          <ConsistencyView entries={entries} onSetView={setView} />
         ) : (
           <EntryList
             entries={entries}

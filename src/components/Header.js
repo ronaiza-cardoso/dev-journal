@@ -1,5 +1,12 @@
 import React from "react";
-import { Calendar, Plus, List, FileText, Download, Upload } from "lucide-react";
+import {
+  Plus,
+  List,
+  FileText,
+  Download,
+  Upload,
+  TrendingUp,
+} from "lucide-react";
 
 const Header = ({ view, onSetView, onImportJSON, onExportJSON, importing }) => {
   return (
@@ -25,11 +32,11 @@ const Header = ({ view, onSetView, onImportJSON, onExportJSON, importing }) => {
             View Entries
           </button>
           <button
-            className={`nav-button ${view === "calendar" ? "active" : ""}`}
-            onClick={() => onSetView("calendar")}
+            className={`nav-button ${view === "consistency" ? "active" : ""}`}
+            onClick={() => onSetView("consistency")}
           >
-            <Calendar size={16} />
-            Activity
+            <TrendingUp size={16} />
+            Consistency
           </button>
           <button
             className="nav-button import-button"
