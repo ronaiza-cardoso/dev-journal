@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { format, startOfWeek } from "date-fns";
+import { format, startOfWeek, subDays, isAfter, isSameDay } from "date-fns";
 import {
   FileText,
   Plus,
@@ -9,6 +9,8 @@ import {
   ChevronDown,
   ChevronRight,
   Edit3,
+  Filter,
+  X,
 } from "lucide-react";
 import MarkdownPreview from "@uiw/react-markdown-preview";
 import { parseLocalDate } from "../utils/dateUtils";
@@ -382,6 +384,34 @@ const EntryList = ({
   autoExpandDate,
 }) => {
   const [expandedYears, setExpandedYears] = useState({});
+  const [filter, setFilter] = useState("all"); // "all", "last7days", "last30days", "last90days"
+
+  // Filter entries based on selected time range
+  const filterEntries = (entries) => {
+    if (filter === "all") return entries;
+
+    const today = new Date();
+    let cutoffDate;
+
+    switch (filter) {
+      case "last7days":
+        cutoffDate = subDays(today, 7);
+        break;
+      case "last30days":
+        cutoffDate = subDays(today, 30);
+        break;
+      case "last90days":
+        cutoffDate = subDays(today, 90);
+        break;
+      default:
+        return entries;
+    }
+
+    return entries.filter((entry) => {
+      const entryDate = parseLocalDate(entry.date);
+      return isAfter(entryDate, cutoffDate) || isSameDay(entryDate, cutoffDate);
+    });
+  };
 
   const groupEntriesByYearAndMonth = (entries) => {
     const grouped = {};
@@ -447,29 +477,79 @@ const EntryList = ({
     );
   }
 
-  const groupedEntries = groupEntriesByYearAndMonth(entries);
+  const filteredEntries = filterEntries(entries);
+  const groupedEntries = groupEntriesByYearAndMonth(filteredEntries);
   const sortedYears = Object.keys(groupedEntries).sort((a, b) => b - a); // Newest first
 
   return (
     <div className="entries-list">
       <div className="entries-header">
-        <h2>Journal Entries ({entries.length})</h2>
+        <h2>Journal Entries ({filteredEntries.length})</h2>
+        <div className="entries-filters">
+          <div className="filter-label">
+            <Filter size={16} />
+            Filter:
+          </div>
+          <div className="filter-buttons">
+            <button
+              className={`filter-button ${filter === "all" ? "active" : ""}`}
+              onClick={() => setFilter("all")}
+            >
+              All Time
+            </button>
+            <button
+              className={`filter-button ${
+                filter === "last7days" ? "active" : ""
+              }`}
+              onClick={() => setFilter("last7days")}
+            >
+              Last 7 Days
+            </button>
+            <button
+              className={`filter-button ${
+                filter === "last30days" ? "active" : ""
+              }`}
+              onClick={() => setFilter("last30days")}
+            >
+              Last 30 Days
+            </button>
+            <button
+              className={`filter-button ${
+                filter === "last90days" ? "active" : ""
+              }`}
+              onClick={() => setFilter("last90days")}
+            >
+              Last 90 Days
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="entries-hierarchy">
-        {sortedYears.map((year) => (
-          <YearSection
-            key={year}
-            year={year}
-            months={groupedEntries[year]}
-            onDeleteEntry={onDeleteEntry}
-            onEditEntry={onEditEntry}
-            isExpanded={expandedYears[year] || false}
-            onToggle={() => toggleYear(year)}
-            autoExpandDate={autoExpandDate}
-          />
-        ))}
-      </div>
+      {filteredEntries.length === 0 ? (
+        <div className="empty-state">
+          <FileText size={48} />
+          <p>No entries found for the selected time period.</p>
+          <button onClick={() => setFilter("all")} className="cta-button">
+            <X size={16} />
+            Clear Filter
+          </button>
+        </div>
+      ) : (
+        <div className="entries-hierarchy">
+          {sortedYears.map((year) => (
+            <YearSection
+              key={year}
+              year={year}
+              months={groupedEntries[year]}
+              onDeleteEntry={onDeleteEntry}
+              onEditEntry={onEditEntry}
+              isExpanded={expandedYears[year] || false}
+              onToggle={() => toggleYear(year)}
+              autoExpandDate={autoExpandDate}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
