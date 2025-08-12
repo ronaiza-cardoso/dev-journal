@@ -11,15 +11,18 @@ import {
   Edit3,
 } from "lucide-react";
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const EntryItem = ({ entry, onDelete, onEdit }) => {
   const formatDateForDisplay = (dateStr) => {
-    const date = new Date(dateStr);
+    // Use timezone-safe date parsing
+    const date = parseLocalDate(dateStr);
     return format(date, "dd");
   };
 
   const formatDayOfWeek = (dateStr) => {
-    const date = new Date(dateStr);
+    // Use timezone-safe date parsing
+    const date = parseLocalDate(dateStr);
     return format(date, "EEE"); // Mon, Tue, Wed, etc.
   };
 
@@ -136,7 +139,7 @@ const MonthSection = ({
   // Group entries by weeks
   const weekGroups = {};
   entries.forEach((entry) => {
-    const date = new Date(entry.date);
+    const date = parseLocalDate(entry.date);
     const weekStart = startOfWeek(date);
     const weekKey = format(weekStart, "MMM dd");
 
@@ -342,7 +345,7 @@ const EntryList = ({ entries, onDeleteEntry, onEditEntry, onSetView }) => {
     const grouped = {};
 
     entries.forEach((entry) => {
-      const date = new Date(entry.date);
+      const date = parseLocalDate(entry.date);
       const year = date.getFullYear();
       const month = format(date, "MMMM");
 

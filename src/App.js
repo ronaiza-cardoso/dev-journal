@@ -8,12 +8,11 @@ import Notification from "./components/Notification";
 import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
 
 import indexedDBService from "./services/indexedDBService";
+import { getCurrentDateString } from "./utils/dateUtils";
 
 function App() {
   const [entries, setEntries] = useState([]);
-  const [currentDate, setCurrentDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
+  const [currentDate, setCurrentDate] = useState(getCurrentDateString());
   const [currentEntry, setCurrentEntry] = useState("");
   const [view, setView] = useState("add");
   const [importing, setImporting] = useState(false);
@@ -157,7 +156,7 @@ function App() {
   const cancelEdit = () => {
     setEditingEntry(null);
     setCurrentEntry("");
-    setCurrentDate(format(new Date(), "yyyy-MM-dd"));
+    setCurrentDate(getCurrentDateString());
   };
 
   const deleteEntry = (id) => {

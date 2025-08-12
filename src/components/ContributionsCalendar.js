@@ -6,6 +6,7 @@ import {
   eachDayOfInterval,
   getDay,
 } from "date-fns";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const ContributionsCalendar = ({ entries }) => {
   const currentYear = new Date().getFullYear();
@@ -83,12 +84,12 @@ const ContributionsCalendar = ({ entries }) => {
   );
 
   const totalEntries = entries.filter((entry) => {
-    const entryYear = new Date(entry.date).getFullYear();
+    const entryYear = parseLocalDate(entry.date).getFullYear();
     return entryYear === currentYear;
   }).length;
 
   const activeDays = Object.keys(entryCountByDate).filter((date) => {
-    const entryYear = new Date(date).getFullYear();
+    const entryYear = parseLocalDate(date).getFullYear();
     return entryYear === currentYear && entryCountByDate[date] > 0;
   }).length;
 
