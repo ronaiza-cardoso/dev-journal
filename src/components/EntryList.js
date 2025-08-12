@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { format, startOfWeek } from "date-fns";
 import {
   FileText,
@@ -130,6 +130,7 @@ const MonthSection = ({
   onEditEntry,
   isExpanded,
   onToggle,
+  autoExpandDate,
 }) => {
   const [expandedWeeks, setExpandedWeeks] = useState({});
 
@@ -162,6 +163,23 @@ const MonthSection = ({
       [weekKey]: !prev[weekKey],
     }));
   };
+
+  // Auto-expand week when autoExpandDate is provided
+  useEffect(() => {
+    if (autoExpandDate && isExpanded) {
+      const date = parseLocalDate(autoExpandDate);
+      const entryMonth = format(date, "MMMM");
+
+      if (entryMonth === month) {
+        const weekStart = startOfWeek(date);
+        const weekKey = format(weekStart, "MMM dd");
+        setExpandedWeeks((prev) => ({
+          ...prev,
+          [weekKey]: true,
+        }));
+      }
+    }
+  }, [autoExpandDate, isExpanded, month]);
 
   return (
     <div className="month-section">
@@ -214,6 +232,7 @@ const YearSection = ({
   onEditEntry,
   isExpanded,
   onToggle,
+  autoExpandDate,
 }) => {
   const [expandedMonths, setExpandedMonths] = useState({});
 
@@ -281,6 +300,22 @@ const YearSection = ({
     }));
   };
 
+  // Auto-expand month when autoExpandDate is provided
+  useEffect(() => {
+    if (autoExpandDate && isExpanded) {
+      const date = parseLocalDate(autoExpandDate);
+      const entryYear = date.getFullYear();
+
+      if (entryYear === parseInt(year)) {
+        const month = format(date, "MMMM");
+        setExpandedMonths((prev) => ({
+          ...prev,
+          [month]: true,
+        }));
+      }
+    }
+  }, [autoExpandDate, isExpanded, year]);
+
   return (
     <div className="year-section">
       <div className="year-header" onClick={onToggle}>
@@ -330,6 +365,7 @@ const YearSection = ({
               onEditEntry={onEditEntry}
               isExpanded={expandedMonths[month] || false}
               onToggle={() => toggleMonth(month)}
+              autoExpandDate={autoExpandDate}
             />
           ))}
         </div>
@@ -338,7 +374,13 @@ const YearSection = ({
   );
 };
 
-const EntryList = ({ entries, onDeleteEntry, onEditEntry, onSetView }) => {
+const EntryList = ({
+  entries,
+  onDeleteEntry,
+  onEditEntry,
+  onSetView,
+  autoExpandDate,
+}) => {
   const [expandedYears, setExpandedYears] = useState({});
 
   const groupEntriesByYearAndMonth = (entries) => {
@@ -378,6 +420,20 @@ const EntryList = ({ entries, onDeleteEntry, onEditEntry, onSetView }) => {
     }));
   };
 
+  // Auto-expand logic for newly created entries
+  useEffect(() => {
+    if (autoExpandDate) {
+      const date = parseLocalDate(autoExpandDate);
+      const year = date.getFullYear();
+
+      // Expand the year containing the new entry
+      setExpandedYears((prev) => ({
+        ...prev,
+        [year]: true,
+      }));
+    }
+  }, [autoExpandDate]);
+
   if (entries.length === 0) {
     return (
       <div className="empty-state">
@@ -410,6 +466,7 @@ const EntryList = ({ entries, onDeleteEntry, onEditEntry, onSetView }) => {
             onEditEntry={onEditEntry}
             isExpanded={expandedYears[year] || false}
             onToggle={() => toggleYear(year)}
+            autoExpandDate={autoExpandDate}
           />
         ))}
       </div>

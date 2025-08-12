@@ -18,6 +18,7 @@ function App() {
   const [importing, setImporting] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [autoExpandDate, setAutoExpandDate] = useState(null);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     entryToDelete: null,
@@ -124,6 +125,9 @@ function App() {
         // Update state
         setEntries((prev) => [newEntry, ...prev]);
 
+        // Set auto-expand date to show the new entry
+        setAutoExpandDate(currentDate);
+
         // Switch to list view to show the new entry
         setView("list");
 
@@ -157,6 +161,7 @@ function App() {
     setEditingEntry(null);
     setCurrentEntry("");
     setCurrentDate(getCurrentDateString());
+    setAutoExpandDate(null); // Clear auto-expand when canceling edit
   };
 
   const deleteEntry = (id) => {
@@ -341,7 +346,12 @@ function App() {
     <div className="app">
       <Header
         view={view}
-        onSetView={setView}
+        onSetView={(newView) => {
+          setView(newView);
+          if (newView === "add") {
+            setAutoExpandDate(null); // Clear auto-expand when switching to add view
+          }
+        }}
         onImportJSON={importJSONEntries}
         onExportJSON={exportToJSON}
         importing={importing}
@@ -364,6 +374,7 @@ function App() {
             onDeleteEntry={deleteEntry}
             onEditEntry={editEntry}
             onSetView={setView}
+            autoExpandDate={autoExpandDate}
           />
         )}
       </main>
