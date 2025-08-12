@@ -29,7 +29,7 @@ import { parseLocalDate } from "../utils/dateUtils";
 
 const WeeklyProgress = ({ entries }) => {
   const [selectedDay, setSelectedDay] = useState(null);
-  
+
   // Get current week
   const today = new Date();
   const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday start
@@ -146,10 +146,7 @@ const WeeklyProgress = ({ entries }) => {
       {selectedDay && (
         <div className="selected-day-entry">
           <div className="entry-header">
-            <h3>
-              Entry for{" "}
-              {format(selectedDay.date, "EEEE, MMMM dd, yyyy")}
-            </h3>
+            <h3>Entry for {format(selectedDay.date, "EEEE, MMMM dd, yyyy")}</h3>
             <button
               className="close-entry-button"
               onClick={() => setSelectedDay(null)}
