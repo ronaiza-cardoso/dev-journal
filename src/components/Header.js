@@ -3,6 +3,7 @@ import {
   Plus,
   List,
   FileText,
+  File,
   Download,
   Upload,
   TrendingUp,
@@ -13,7 +14,7 @@ const Header = ({ view, onSetView, onImportJSON, onExportJSON, importing }) => {
     <header className="app-header">
       <div className="header-content">
         <h1>
-          <FileText className="header-icon" />
+          <File className="header-icon" />
           Dev Journal
         </h1>
         <nav className="nav-buttons">
