@@ -83,51 +83,11 @@ body {
   color: white;
 }
 
-.export-dropdown {
-  position: relative;
-}
-
+/* Import and Export Button Styles */
+.import-button:hover,
 .export-button:hover {
   background: rgba(72, 187, 120, 0.1);
   color: #48bb78;
-}
-
-.export-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  min-width: 180px;
-  overflow: hidden;
-  margin-top: 4px;
-}
-
-.export-option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: white;
-  color: #2d3748;
-  font-size: 0.875rem;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.export-option:hover {
-  background: #f7fafc;
-  color: #667eea;
-}
-
-.export-option:first-child {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Notification Styles */

@@ -6,7 +6,7 @@ import EntryForm from "./components/EntryForm";
 import EntryList from "./components/EntryList";
 import Notification from "./components/Notification";
 import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
-import { loadMarkdownFile } from "./markdownParser";
+
 import indexedDBService from "./services/indexedDBService";
 
 function App() {
@@ -248,103 +248,94 @@ function App() {
     );
   };
 
-  const exportToMarkdown = () => {
-    const groupedEntries = entries.reduce((acc, entry) => {
-      const year = entry.date.split("-")[0];
-      if (!acc[year]) acc[year] = [];
-      acc[year].push(entry);
-      return acc;
-    }, {});
+  const importJSONEntries = () => {
+    // Create a file input element for JSON import
+    // Expected JSON format: { entries: [{ id, date, mainEntry, timestamp, ... }] }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.style.display = "none";
 
-    Object.keys(groupedEntries).forEach((year) => {
-      let markdown = "";
-      const yearEntries = groupedEntries[year].sort((a, b) =>
-        a.date.localeCompare(b.date)
-      );
+    input.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
 
-      yearEntries.forEach((entry) => {
-        markdown += `## ${entry.date}\n\n`;
-        markdown += `${entry.mainEntry}\n`;
+      setImporting(true);
+      try {
+        const text = await file.text();
+        const importData = JSON.parse(text);
 
-        entry.subEntries.forEach((sub, index) => {
-          markdown += `   ${index + 1}.1 ${sub}\n`;
-        });
+        // Validate the JSON structure
+        if (!importData.entries || !Array.isArray(importData.entries)) {
+          throw new Error("Invalid JSON format: 'entries' array not found");
+        }
 
-        markdown += "\n";
-      });
+        // Get existing entries to avoid duplicates
+        const existingEntries = entries;
+        const existingDates = new Set(
+          existingEntries.map((entry) => entry.date)
+        );
 
-      // Create and download file
-      const blob = new Blob([markdown], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${year}.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  };
+        // Filter out entries that already exist (by date)
+        const newEntries = importData.entries.filter(
+          (entry) => !existingDates.has(entry.date)
+        );
 
-  const importMarkdownEntries = async () => {
-    setImporting(true);
-    try {
-      // Load entries from both markdown files
-      const entries2024 = await loadMarkdownFile("/2024.md");
-      const entries2025 = await loadMarkdownFile("/2025.md");
+        if (newEntries.length > 0) {
+          try {
+            // Add imported flag to new entries
+            const processedEntries = newEntries.map((entry) => ({
+              ...entry,
+              imported: true,
+              id: entry.id || Date.now() + Math.random(), // Ensure unique ID
+            }));
 
-      // Combine all entries
-      const allImportedEntries = [...entries2024, ...entries2025];
+            // Save imported entries to IndexedDB
+            await indexedDBService.saveMultipleEntries(processedEntries);
 
-      // Get existing entries to avoid duplicates
-      const existingEntries = entries;
-      const existingDates = new Set(existingEntries.map((entry) => entry.date));
-
-      // Filter out entries that already exist (by date)
-      const newEntries = allImportedEntries.filter(
-        (entry) => !existingDates.has(entry.date)
-      );
-
-      if (newEntries.length > 0) {
-        try {
-          // Save imported entries to IndexedDB
-          await indexedDBService.saveMultipleEntries(newEntries);
-
-          // Add imported entries to existing ones
-          const updatedEntries = [...existingEntries, ...newEntries].sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
-          );
-          setEntries(updatedEntries);
+            // Add imported entries to existing ones
+            const updatedEntries = [
+              ...existingEntries,
+              ...processedEntries,
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+            setEntries(updatedEntries);
+            showNotification(
+              "success",
+              "Import Complete",
+              `Successfully imported ${newEntries.length} entries from JSON file.`
+            );
+          } catch (error) {
+            console.error("Error saving imported entries:", error);
+            showNotification(
+              "error",
+              "Import Failed",
+              "Error importing entries. Please try again."
+            );
+          }
+        } else {
           showNotification(
-            "success",
-            "Import Complete",
-            `Successfully imported ${newEntries.length} entries from your markdown files.`
-          );
-        } catch (error) {
-          console.error("Error saving imported entries:", error);
-          showNotification(
-            "error",
-            "Import Failed",
-            "Error importing entries. Please try again."
+            "warning",
+            "No New Entries",
+            "All entries from the JSON file are already in the system."
           );
         }
-      } else {
+      } catch (error) {
+        console.error("Error importing JSON entries:", error);
         showNotification(
-          "warning",
-          "No New Entries",
-          "All entries from your markdown files are already in the system."
+          "error",
+          "Import Error",
+          error.message.includes("JSON")
+            ? "Invalid JSON file format. Please make sure it's a valid Dev Journal export file."
+            : "Error reading the JSON file. Please try again."
         );
+      } finally {
+        setImporting(false);
+        document.body.removeChild(input);
       }
-    } catch (error) {
-      console.error("Error importing markdown entries:", error);
-      showNotification(
-        "error",
-        "Import Error",
-        "Error importing markdown files. Please make sure the files are accessible."
-      );
-    } finally {
-      setImporting(false);
-    }
+    };
+
+    document.body.appendChild(input);
+    input.click();
   };
 
   return (
@@ -352,8 +343,7 @@ function App() {
       <Header
         view={view}
         onSetView={setView}
-        onImport={importMarkdownEntries}
-        onExportMarkdown={exportToMarkdown}
+        onImportJSON={importJSONEntries}
         onExportJSON={exportToJSON}
         importing={importing}
       />
