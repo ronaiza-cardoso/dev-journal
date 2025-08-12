@@ -275,19 +275,17 @@ body {
 
 .day-indicator {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-  padding: 0.75rem 0.5rem;
-  border-radius: 50%;
+  gap: 0.25rem;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   cursor: default;
-  aspect-ratio: 1;
-  min-height: 80px;
-  justify-content: center;
+  min-height: 60px;
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
 }
 
 .day-indicator.completed {
@@ -305,6 +303,15 @@ body {
 
 .day-indicator.future {
   opacity: 0.6;
+}
+
+.day-indicator.clickable {
+  cursor: pointer;
+}
+
+.day-indicator.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 
 .day-name {
@@ -357,6 +364,57 @@ body {
   text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
 }
 
+.selected-day-entry {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.selected-day-entry .entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.selected-day-entry .entry-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.selected-day-entry .close-entry-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selected-day-entry .close-entry-button:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.selected-day-entry .entry-content {
+  line-height: 1.6;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .weekly-progress {
@@ -381,9 +439,10 @@ body {
   }
 
   .day-indicator {
-    padding: 0.5rem;
-    min-height: 60px;
+    padding: 0.5rem 0.75rem;
+    min-height: 50px;
     gap: 0.25rem;
+    font-size: 0.7rem;
   }
 
   .day-name {
@@ -398,6 +457,15 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     text-align: center;
+  }
+
+  .selected-day-entry {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .selected-day-entry .entry-header h3 {
+    font-size: 1.1rem;
   }
 }
 

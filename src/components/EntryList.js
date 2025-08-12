@@ -28,6 +28,8 @@ import MarkdownPreview from "@uiw/react-markdown-preview";
 import { parseLocalDate } from "../utils/dateUtils";
 
 const WeeklyProgress = ({ entries }) => {
+  const [selectedDay, setSelectedDay] = useState(null);
+  
   // Get current week
   const today = new Date();
   const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday start
@@ -40,6 +42,7 @@ const WeeklyProgress = ({ entries }) => {
 
   // Check which days have entries
   const entryDates = new Set(entries.map((entry) => entry.date));
+  const entryMap = new Map(entries.map((entry) => [entry.date, entry]));
 
   const daysWithEntries = weekDays.map((day) => {
     const dayStr = format(day, "yyyy-MM-dd");
@@ -50,6 +53,7 @@ const WeeklyProgress = ({ entries }) => {
       date: day,
       dateStr: dayStr,
       hasEntry: entryDates.has(dayStr),
+      entry: entryMap.get(dayStr),
       dayName: dayNames[dayOfWeek],
       isPast: day < startOfDay(today),
       isToday: isSameDay(day, today),
@@ -57,7 +61,7 @@ const WeeklyProgress = ({ entries }) => {
     };
   });
 
-  // Calculate points and achievements
+  // Calculate completion percentage
   const completedDays = daysWithEntries.filter((day) => day.hasEntry).length;
   const possibleDays = daysWithEntries.filter(
     (day) => day.isPast || day.isToday
@@ -65,26 +69,20 @@ const WeeklyProgress = ({ entries }) => {
   const weekProgress =
     possibleDays > 0 ? (completedDays / possibleDays) * 100 : 0;
 
-  // Points system
-  const basePoints = completedDays * 10; // 10 points per day
-  const consistencyBonus = completedDays === 7 ? 50 : 0; // Bonus for full week
-  const streakBonus = completedDays >= 5 ? 25 : 0; // Bonus for 5+ days
-  const totalPoints = basePoints + consistencyBonus + streakBonus;
-
-  // Get achievement level
-  const getAchievementLevel = (points) => {
-    if (points >= 120)
+  // Get achievement level based on percentage
+  const getAchievementLevel = (percentage) => {
+    if (percentage >= 100)
       return { level: "Perfect Week!", icon: Trophy, color: "#ffd700" };
-    if (points >= 100)
+    if (percentage >= 85)
       return { level: "Excellent!", icon: Zap, color: "#10b981" };
-    if (points >= 70)
+    if (percentage >= 70)
       return { level: "Great Job!", icon: Target, color: "#3b82f6" };
-    if (points >= 40)
+    if (percentage >= 50)
       return { level: "Good Progress", icon: Calendar, color: "#8b5cf6" };
     return { level: "Keep Going!", icon: Plus, color: "#6b7280" };
   };
 
-  const achievement = getAchievementLevel(totalPoints);
+  const achievement = getAchievementLevel(weekProgress);
   const AchievementIcon = achievement.icon;
 
   return (
@@ -95,7 +93,7 @@ const WeeklyProgress = ({ entries }) => {
           <span>Weekly Challenge</span>
         </div>
         <div className="progress-score">
-          <span className="points">{totalPoints} pts</span>
+          <span className="points">{Math.round(weekProgress)}%</span>
           <span className="level" style={{ color: achievement.color }}>
             {achievement.level}
           </span>
@@ -108,19 +106,22 @@ const WeeklyProgress = ({ entries }) => {
             key={index}
             className={`day-indicator ${day.hasEntry ? "completed" : ""} ${
               day.isToday ? "today" : ""
-            } ${day.isFuture ? "future" : ""}`}
+            } ${day.isFuture ? "future" : ""} ${
+              day.hasEntry ? "clickable" : ""
+            }`}
             title={`${format(day.date, "EEEE, MMM dd")} ${
               day.hasEntry
-                ? "✓ Entry completed"
+                ? "✓ Entry completed - Click to view"
                 : day.isFuture
                 ? "Future day"
                 : "○ No entry yet"
             }`}
+            onClick={() => day.hasEntry && setSelectedDay(day)}
           >
-            <span className="day-name">{day.dayName}</span>
-            <div className="day-status">
-              {day.hasEntry ? "✓" : day.isFuture ? "○" : "○"}
-            </div>
+            <span className="day-name">[{day.dayName}</span>
+            <span className="day-status">
+              {day.hasEntry ? " x]" : day.isFuture ? " ]" : " ]"}
+            </span>
           </div>
         ))}
       </div>
@@ -137,17 +138,39 @@ const WeeklyProgress = ({ entries }) => {
 
       <div className="progress-stats">
         <span>
-          {completedDays}/{possibleDays} days completed
+          {completedDays}/{possibleDays} days completed (
+          {Math.round(weekProgress)}%)
         </span>
-        {consistencyBonus > 0 && (
-          <span className="bonus">
-            Perfect Week Bonus! +{consistencyBonus} pts
-          </span>
-        )}
-        {streakBonus > 0 && !consistencyBonus && (
-          <span className="bonus">Consistency Bonus! +{streakBonus} pts</span>
-        )}
       </div>
+
+      {selectedDay && (
+        <div className="selected-day-entry">
+          <div className="entry-header">
+            <h3>
+              Entry for{" "}
+              {format(selectedDay.date, "EEEE, MMMM dd, yyyy")}
+            </h3>
+            <button
+              className="close-entry-button"
+              onClick={() => setSelectedDay(null)}
+            >
+              ×
+            </button>
+          </div>
+          <div className="entry-content">
+            <MarkdownPreview
+              source={selectedDay.entry.mainEntry}
+              data-color-mode="light"
+              style={{
+                backgroundColor: "white",
+                padding: "1rem",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
