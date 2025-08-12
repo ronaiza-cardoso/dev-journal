@@ -251,10 +251,50 @@ body {
 .markdown-editor-container .w-md-editor-text-pre,
 .markdown-editor-container .w-md-editor-text-input,
 .markdown-editor-container .w-md-editor-text {
-  font-size: 14px !important;
-  line-height: 1.6 !important;
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
-    "Courier New", monospace !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
+/* Fix cursor positioning and text rendering issues */
+.markdown-editor-container .w-md-editor-text-input {
+  caret-color: #333 !important;
+}
+
+.markdown-editor-container .w-md-editor-text-pre .token.title {
+  background: transparent !important;
+}
+
+/* Force proper text alignment and cursor positioning */
+.markdown-editor-container .w-md-editor-text-input,
+.markdown-editor-container .w-md-editor-text-pre {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  word-break: normal !important;
+  text-align: left !important;
+  direction: ltr !important;
+}
+
+/* Disable syntax highlighting that can cause cursor issues */
+.markdown-editor-container .w-md-editor-text-pre .token {
+  color: inherit !important;
+  background: transparent !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+}
+
+/* Simple textarea markdown editor */
+.markdown-textarea:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+.markdown-textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
 }
 
 .markdown-editor-container .w-md-editor-preview {
@@ -565,31 +605,6 @@ body {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* Markdown Editor Styles */
-.markdown-editor-container {
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 2px solid #e2e8f0;
-  transition: border-color 0.2s;
-}
-
-.markdown-editor-container:focus-within {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.markdown-editor-container .w-md-editor {
-  background-color: white;
-}
-
-.markdown-editor-container .w-md-editor-text-pre,
-.markdown-editor-container .w-md-editor-text-input,
-.markdown-editor-container .w-md-editor-text {
-  font-size: 1rem !important;
-  font-family: inherit !important;
-  line-height: 1.5 !important;
 }
 
 .sub-entry-editor {

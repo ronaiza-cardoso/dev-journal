@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Calendar, Save, Edit, Eye } from "lucide-react";
-import MDEditor from "@uiw/react-md-editor";
 import MarkdownPreview from "@uiw/react-markdown-preview";
 
 const EntryForm = ({
@@ -58,15 +57,26 @@ const EntryForm = ({
 
             <div className="editor-content">
               {activeTab === "markdown" ? (
-                <MDEditor
+                <textarea
                   value={currentEntry}
-                  onChange={setCurrentEntry}
-                  preview="edit"
-                  hideToolbar={false}
-                  height={500}
-                  data-color-mode="light"
+                  onChange={(e) => setCurrentEntry(e.target.value)}
                   placeholder="Describe what you worked on today..."
-                  visibleDragBar={false}
+                  className="markdown-textarea"
+                  spellCheck={false}
+                  style={{
+                    width: "100%",
+                    height: "500px",
+                    fontSize: "1rem",
+                    lineHeight: "1.5",
+                    fontFamily:
+                      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    padding: "16px",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "0 0 8px 8px",
+                    resize: "vertical",
+                    outline: "none",
+                    backgroundColor: "white",
+                  }}
                 />
               ) : (
                 <div className="preview-container">
